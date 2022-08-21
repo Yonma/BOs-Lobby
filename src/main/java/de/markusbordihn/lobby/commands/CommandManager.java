@@ -53,6 +53,7 @@ public class CommandManager {
     MiningCommand.register(commandDispatcher);
     SpawnCommand.register(commandDispatcher);
     VoidCommand.register(commandDispatcher);
+    NewDimCommand.register(commandDispatcher);
   }
 
   public static void executeServerCommand(String command) {

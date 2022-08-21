@@ -162,6 +162,7 @@ Teleport to the corresponding dimension and run the corresponding functions like
 - `/function lobby:lobby_dimension_load`
 - `/function lobby:mining_dimension_load`
 - `/function lobby:void_dimension_load`
+- `/function lobby:newdim_dimension_load`
 
 **Note: This will overwrite any existing block, but no entities see <https://bugs.mojang.com/browse/MC-102430>.**
 

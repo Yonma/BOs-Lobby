@@ -64,6 +64,11 @@ public class TeleporterManager {
   private static int fishingSpawnPointY = COMMON.fishingSpawnPointY.get();
   private static int fishingSpawnPointZ = COMMON.fishingSpawnPointZ.get();
 
+  private static boolean newdimUseCustomSpawnPoint = COMMON.newdimUseCustomSpawnPoint.get();
+  private static int newdimSpawnPointX = COMMON.newdimSpawnPointX.get();
+  private static int newdimSpawnPointY = COMMON.newdimSpawnPointY.get();
+  private static int newdimSpawnPointZ = COMMON.newdimSpawnPointZ.get();
+
   private static boolean gamingUseCustomSpawnPoint = COMMON.gamingUseCustomSpawnPoint.get();
   private static int gamingSpawnPointX = COMMON.gamingSpawnPointX.get();
   private static int gamingSpawnPointY = COMMON.gamingSpawnPointY.get();
@@ -86,6 +91,7 @@ public class TeleporterManager {
 
   // Default spawn points for the default structures
   private static BlockPos defaultFishingSpawnPoint = new BlockPos(42, 51, 12);
+  private static BlockPos defaultNewDimSpawnPoint = new BlockPos(42, 51, 12);
   private static BlockPos defaultGamingSpawnPoint = new BlockPos(0, 4, 0);
   private static BlockPos defaultLobbySpawnPoint = new BlockPos(9, 11, 9);
   private static BlockPos defaultMiningSpawnPoint = new BlockPos(203, 9, 560);
@@ -93,6 +99,7 @@ public class TeleporterManager {
 
   // Clickable commands
   private static Component fishingCommand;
+  private static Component newdimCommand;
   private static Component gamingCommand;
   private static Component lobbyCommand;
   private static Component miningCommand;
@@ -112,6 +119,11 @@ public class TeleporterManager {
     fishingSpawnPointX = COMMON.fishingSpawnPointX.get();
     fishingSpawnPointY = COMMON.fishingSpawnPointY.get();
     fishingSpawnPointZ = COMMON.fishingSpawnPointZ.get();
+
+    newdimUseCustomSpawnPoint = COMMON.newdimUseCustomSpawnPoint.get();
+    newdimSpawnPointX = COMMON.newdimSpawnPointX.get();
+    newdimSpawnPointY = COMMON.newdimSpawnPointY.get();
+    newdimSpawnPointZ = COMMON.newdimSpawnPointZ.get();
 
     gamingUseCustomSpawnPoint = COMMON.gamingUseCustomSpawnPoint.get();
     gamingSpawnPointX = COMMON.gamingSpawnPointX.get();
@@ -137,6 +149,9 @@ public class TeleporterManager {
     fishingCommand = new TextComponent("/" + COMMON.fishingCommandName.get())
         .setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(
             ClickEvent.Action.SUGGEST_COMMAND, "/" + COMMON.fishingCommandName.get())));
+    newdimCommand = new TextComponent("/" + COMMON.newdimCommandName.get())
+            .setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(
+                    ClickEvent.Action.SUGGEST_COMMAND, "/" + COMMON.newdimCommandName.get())));
     gamingCommand = new TextComponent("/" + COMMON.gamingCommandName.get())
         .setStyle(Style.EMPTY.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(
             ClickEvent.Action.SUGGEST_COMMAND, "/" + COMMON.gamingCommandName.get())));
@@ -162,6 +177,11 @@ public class TeleporterManager {
       log.info("{} Using custom spawn point {} {} {} for fishing dimension",
           Constants.LOG_TELEPORT_MANAGER_PREFIX, fishingSpawnPointX, fishingSpawnPointY,
           fishingSpawnPointZ);
+    }
+    if (newdimUseCustomSpawnPoint) {
+      log.info("{} Using custom spawn point {} {} {} for newdim dimension",
+              Constants.LOG_TELEPORT_MANAGER_PREFIX, newdimSpawnPointX, newdimSpawnPointY,
+              newdimSpawnPointZ);
     }
     if (gamingUseCustomSpawnPoint) {
       log.info("{} Using custom spawn point {} {} {} for gaming dimension",
@@ -223,6 +243,27 @@ public class TeleporterManager {
           new TranslatableComponent(Constants.TEXT_PREFIX + "welcome_to_fishing", fishingCommand,
               gamingCommand, lobbyCommand, miningCommand, spawnCommand, voidCommand),
           Util.NIL_UUID);
+    }
+    return successfullyTeleported;
+  }
+
+  public static boolean teleportToNewDimDimension(ServerPlayer player) {
+    ServerLevel newdimDimension = DimensionManager.getNewDimDimension();
+    boolean isSameDimension = player.level == newdimDimension;
+    boolean successfullyTeleported = false;
+    if (newdimUseCustomSpawnPoint) {
+      successfullyTeleported = teleportPlayer(player, newdimDimension, newdimSpawnPointX,
+              newdimSpawnPointY, newdimSpawnPointZ);
+    } else {
+      successfullyTeleported =
+              teleportPlayer(player, newdimDimension, defaultNewDimSpawnPoint.getX(),
+                      defaultNewDimSpawnPoint.getY(), defaultNewDimSpawnPoint.getZ());
+    }
+    if (successfullyTeleported && !isSameDimension) {
+      player.sendMessage(
+              new TranslatableComponent(Constants.TEXT_PREFIX + "welcome_to_newdim", fishingCommand,
+                      gamingCommand, lobbyCommand, miningCommand, spawnCommand, voidCommand, newdimCommand),
+              Util.NIL_UUID);
     }
     return successfullyTeleported;
   }

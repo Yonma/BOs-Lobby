@@ -147,13 +147,26 @@ public final class CommonConfig {
     public final ForgeConfigSpec.IntValue voidSpawnPointZ;
     public final ForgeConfigSpec.ConfigValue<List<String>> voidBuilderList;
 
+    public final ForgeConfigSpec.BooleanValue newdimEnabled;
+    public final ForgeConfigSpec.ConfigValue<String> newdimDimension;
+    public final ForgeConfigSpec.ConfigValue<String> newdimDimensionName;
+    public final ForgeConfigSpec.ConfigValue<String> newdimCommandName;
+    public final ForgeConfigSpec.IntValue newdimCommandPermissionLevel;
+    public final ForgeConfigSpec.BooleanValue newdimRestrictCommand;
+    public final ForgeConfigSpec.BooleanValue newdimDisableMobSpawning;
+    public final ForgeConfigSpec.BooleanValue newdimUseCustomSpawnPoint;
+    public final ForgeConfigSpec.IntValue newdimSpawnPointX;
+    public final ForgeConfigSpec.IntValue newdimSpawnPointY;
+    public final ForgeConfigSpec.IntValue newdimSpawnPointZ;
+    public final ForgeConfigSpec.ConfigValue<List<String>> newdimBuilderList;
+
     Config(ForgeConfigSpec.Builder builder) {
       builder.comment(Constants.MOD_NAME);
 
       builder.push("Commands");
       generalCommandCoolDown =
           builder.comment("Delay in seconds before a teleport command could be used again!")
-              .defineInRange("generalCommandCoolDown", 30, 1, 300);
+              .defineInRange("generalCommandCoolDown", 5, 1, 300);
       generalDefaultToLobby = builder.comment(
           "Teleports the player to the lobby for their first connect or after a server restart!")
           .define("generalDefaultToLobby", true);
@@ -172,7 +185,7 @@ public final class CommonConfig {
               .define("teleportDelayCounterVisible", true);
       teleportDelayCounter =
           builder.comment("Teleport delay in seconds a player needs to stand still to teleport.")
-              .defineInRange("teleportDelayCounter", 10, 0, 60);
+              .defineInRange("teleportDelayCounter", 3, 0, 60);
       builder.pop();
 
       builder.push("Default Dimension");
@@ -307,6 +320,27 @@ public final class CommonConfig {
       voidBuilderList = builder.comment(
           "List of builders which are automatically switched to the creative mode inside the void dimension.")
           .define("voidBuilderList", new ArrayList<String>(Arrays.asList("")));
+      builder.pop();
+
+      builder.push("NewDim Dimension");
+      newdimEnabled = builder.define("newdimEnabled", true);
+      newdimDimension = builder.define("newdimDimension", "lobby:newdim_dimension");
+      newdimDimensionName = builder.define("newdimDimensionName", "NewDim");
+      newdimCommandName =
+              builder.comment("Command user could use to teleport to the dimension like /newdim")
+                      .define("newdimCommandName", "newdim");
+      newdimCommandPermissionLevel = builder.defineInRange("newdimCommandPermissionLevel", 0, 0, 4);
+      newdimRestrictCommand = builder.comment(
+                      "If enabled the teleport command could not be used if the user is already in the newdim dimension.")
+              .define("newdimRestrictCommand", false);
+      newdimDisableMobSpawning = builder.define("newdimDisableMobSpawning", false);
+      newdimUseCustomSpawnPoint = builder.define("newdimUseCustomSpawnPoint", false);
+      newdimSpawnPointX = builder.defineInRange("newdimSpawnPointX", 42, -1000, 1000);
+      newdimSpawnPointY = builder.defineInRange("newdimSpawnPointY", 51, -1000, 1000);
+      newdimSpawnPointZ = builder.defineInRange("newdimSpawnPointZ", 12, -1000, 1000);
+      newdimBuilderList = builder.comment(
+                      "List of builders which are automatically switched to the creative mode inside the newdim dimension.")
+              .define("newdimBuilderList", new ArrayList<String>(Arrays.asList("")));
       builder.pop();
 
     }

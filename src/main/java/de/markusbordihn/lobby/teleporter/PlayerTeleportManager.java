@@ -57,6 +57,7 @@ public class PlayerTeleportManager {
   private static Set<PlayerValidation> teleportPlayerToLobbyList = ConcurrentHashMap.newKeySet();
   private static Set<PlayerValidation> teleportPlayerToMiningList = ConcurrentHashMap.newKeySet();
   private static Set<PlayerValidation> teleportPlayerToVoidList = ConcurrentHashMap.newKeySet();
+  private static Set<PlayerValidation> teleportPlayerToNewDimList = ConcurrentHashMap.newKeySet();
 
   private static final int PLAYER_TELEPORT_CHECK = 20;
   private static int ticker = 0;
@@ -91,6 +92,7 @@ public class PlayerTeleportManager {
     checkTeleportToDimension(teleportPlayerToLobbyList, "Lobby");
     checkTeleportToDimension(teleportPlayerToMiningList, "Mining");
     checkTeleportToDimension(teleportPlayerToVoidList, "Void");
+    checkTeleportToDimension(teleportPlayerToNewDimList, "NewDim");
 
     ticker = 0;
   }
@@ -109,6 +111,10 @@ public class PlayerTeleportManager {
 
   public static void teleportPlayerToLobby(ServerPlayer player) {
     teleportPlayerToLobbyList.add(new PlayerValidation(player));
+  }
+
+  public static void teleportPlayerToNewDim(ServerPlayer player) {
+    teleportPlayerToNewDimList.add(new PlayerValidation(player));
   }
 
   public static void teleportPlayerToMining(ServerPlayer player) {
@@ -149,6 +155,9 @@ public class PlayerTeleportManager {
               break;
             case "Lobby":
               DimensionManager.teleportToLobby(player);
+              break;
+            case "NewDim":
+              DimensionManager.teleportToNewDim(player);
               break;
             case "Mining":
               DimensionManager.teleportToMining(player);

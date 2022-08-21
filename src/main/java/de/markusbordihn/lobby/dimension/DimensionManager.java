@@ -77,6 +77,10 @@ public class DimensionManager {
   private static String voidDimension = COMMON.voidDimension.get();
   private static List<String> voidBuilderList = COMMON.voidBuilderList.get();
 
+  private static boolean newdimEnabled = COMMON.newdimEnabled.get();
+  private static String newdimDimension = COMMON.newdimDimension.get();
+  private static List<String> newdimBuilderList = COMMON.newdimBuilderList.get();
+
   private static Set<ServerPlayer> gameTypeReset = ConcurrentHashMap.newKeySet();
   private static Set<String> ignoredDimension = ConcurrentHashMap.newKeySet();
 
@@ -86,6 +90,7 @@ public class DimensionManager {
   private static ServerLevel lobbyLevel = null;
   private static ServerLevel miningLevel = null;
   private static ServerLevel voidLevel = null;
+  private static ServerLevel newDimLevel = null;
 
   protected DimensionManager() {}
 
@@ -96,6 +101,7 @@ public class DimensionManager {
     fishingLevel = null;
     lobbyLevel = null;
     miningLevel = null;
+    newDimLevel = null;
 
     // Make sure we have the current config settings.
     defaultDimension = COMMON.defaultDimension.get();
@@ -215,12 +221,26 @@ public class DimensionManager {
       return;
     }
 
+    // Make sure normal users are in Adventure mode for the newDim dimension even if they are using
+    // tp or similar commands.
+    if (toLocation.equals(newdimDimension)) {
+      if (!COMMON.newdimBuilderList.get().isEmpty()
+              && COMMON.newdimBuilderList.get().contains(player.getName().getString())) {
+        log.info("{} Give builder {} creative mode for fishing dimension.",
+                Constants.LOG_DIMENSION_MANAGER_PREFIX, player.getName().getString());
+        changeGameType(player, GameType.CREATIVE);
+      } else {
+        changeGameType(player, GameType.ADVENTURE);
+      }
+    }
+
     // Reset game type to survival if user is on the gameTypeReset list or comes from the fishing,
     // gaming, lobby or void dimensions.
     if (player instanceof ServerPlayer serverPlayer
         && (gameTypeReset.contains(serverPlayer) || (!fromLocation.isEmpty()
             && (fromLocation.equals(lobbyDimension) || fromLocation.equals(fishingDimension)
-                || fromLocation.equals(gamingDimension) || fromLocation.equals(voidDimension))))) {
+                || fromLocation.equals(gamingDimension) || fromLocation.equals(voidDimension)
+                || fromLocation.equals(newdimDimension))))) {
 
       // Add fall and fire protection for the player, if enabled.
       if (defaultFallProtection > 0) {
@@ -249,7 +269,7 @@ public class DimensionManager {
 
   private static void mapServerLevel(MinecraftServer server) {
     // Skip search if we already found all relevant dimensions.
-    if (defaultLevel != null && lobbyLevel != null && miningLevel != null && fishingLevel != null) {
+    if (defaultLevel != null && lobbyLevel != null && miningLevel != null && fishingLevel != null && newDimLevel != null) {
       return;
     }
 
@@ -297,6 +317,13 @@ public class DimensionManager {
           voidLevel = serverLevel;
           DataPackHandler.prepareDataPackOnce(voidLevel);
         }
+      } else if (dimensionLocation.equals(newdimDimension)) {
+        if (newDimLevel == null) {
+          log.info("{} ✔️ Found NewDim dimension with name {}: {}",
+                  Constants.LOG_DIMENSION_MANAGER_PREFIX, newdimDimension, serverLevel);
+          newDimLevel = serverLevel;
+          DataPackHandler.prepareDataPackOnce(newDimLevel);
+        }
       } else {
         if (ignoredDimension.isEmpty() || !ignoredDimension.contains(dimensionLocation)) {
           log.info("{} Ignore dimension {}: {}", Constants.LOG_DIMENSION_MANAGER_PREFIX,
@@ -332,7 +359,10 @@ public class DimensionManager {
       log.error("{} ⚠️ Unable to find void dimension named {}!",
           Constants.LOG_DIMENSION_MANAGER_PREFIX, voidDimension);
     }
-
+    if (newDimLevel == null) {
+      log.error("{} ⚠️ Unable to find NewDim dimension named {}!",
+              Constants.LOG_DIMENSION_MANAGER_PREFIX, newdimDimension);
+    }
     if (defaultLevel != null && fishingLevel == null && lobbyLevel == null && miningLevel == null) {
       log.error("{} ⚠️ Unable to find the needed custom dimensions!\n"
           + "If this is the first time you see this message or if you just started a new world, try to restart your server to generate them automatically!",
@@ -349,6 +379,17 @@ public class DimensionManager {
 
   public static String getLobbyDimensionName() {
     return lobbyDimension;
+  }
+
+  public static ServerLevel getNewDimDimension() {
+    if (newDimLevel == null) {
+      mapServerLevel(ServerLifecycleHooks.getCurrentServer());
+    }
+    return newDimLevel;
+  }
+
+  public static String getNewDimDimensionName() {
+    return newdimDimension;
   }
 
 
@@ -449,6 +490,19 @@ public class DimensionManager {
       if (!lobbyBuilderList.isEmpty() && lobbyBuilderList.contains(player.getName().getString())) {
         log.info("{} Give builder {} creative mode for lobby.",
             Constants.LOG_DIMENSION_MANAGER_PREFIX, player.getName().getString());
+        changeGameType(player, GameType.CREATIVE);
+      } else {
+        changeGameType(player, GameType.ADVENTURE);
+      }
+    }
+  }
+
+  public static void teleportToNewDim(ServerPlayer player) {
+    if (TeleporterManager.teleportToNewDimDimension(player)) {
+      if (!newdimBuilderList.isEmpty()
+              && newdimBuilderList.contains(player.getName().getString())) {
+        log.info("{} Give builder {} creative mode for newDim.",
+                Constants.LOG_DIMENSION_MANAGER_PREFIX, player.getName().getString());
         changeGameType(player, GameType.CREATIVE);
       } else {
         changeGameType(player, GameType.ADVENTURE);
