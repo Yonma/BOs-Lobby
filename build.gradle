@@ -9,16 +9,21 @@ buildscript {
   }
 }
 
+
+
 plugins {
   id 'com.matthewprenger.cursegradle' version '1.4.0'
   id 'nu.studer.credentials' version '1.0.7'
 }
+
 
 apply plugin: 'net.minecraftforge.gradle'
 // Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 compileJava {options.encoding = "UTF-8"}
+
+
 
 version = "${version_major}.${version_minor}.${version_patch}"
 archivesBaseName = "${mod_id}_${mc_version}"
@@ -43,6 +48,12 @@ minecraft {
   runs {
     client {
       workingDirectory project.file('run')
+
+      arg '-mixin.config=create.mixins.json'
+      arg '-mixin.config=flywheel.mixins.json'
+      property 'forge.logging.console.level', 'info'
+      property 'mixin.env.remapRefMap', 'true'
+      property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
       // Recommended logging data for a userdev environment
       // The markers can be changed as needed.
@@ -131,6 +142,9 @@ dependencies {
 
   // Integration: ftb-essentials-forge
   compileOnly fg.deobf("curse.maven:ftb-essentials-forge-410811:3773058")
+  // Create Mod integration
+  implementation fg.deobf("curse.maven:create-328085:3934676")
+  implementation fg.deobf("curse.maven:flywheel-486392:3934664")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
